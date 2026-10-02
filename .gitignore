@@ -1,0 +1,18 @@
+# Environment & API Keys
+.env
+.env.local
+*.env
+
+# Large Media Outputs & Temp Files
+output_workspace/
+don'edit this just generated samples/
+*.mp4
+chunk_*TEMP*.mp4
+final_video*TEMP*.mp4
+
+# Python Cache & IDE
+__pycache__/
+*.py[cod]
+*$py.class
+.vscode/
+.idea/

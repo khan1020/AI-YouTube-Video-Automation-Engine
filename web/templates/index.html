@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Automation Studio</title>
+    <meta name="description" content="AI-powered YouTube video generation with professional editing effects">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-icon">🎬</div>
+            <h1>YouTube Automation Studio</h1>
+            <p>AI-powered video generation with broadcast-quality editing</p>
+        </header>
+
+        <!-- Input Form -->
+        <div class="form-card" id="formCard">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Video Topic</label>
+                    <input type="text" id="topicInput" placeholder="e.g. The History of Ancient Rome" />
+                </div>
+                <div class="form-group">
+                    <label>Duration</label>
+                    <select id="durationSelect">
+                        <option value="1">1 min</option>
+                        <option value="2" selected>2 min</option>
+                        <option value="3">3 min</option>
+                        <option value="5">5 min</option>
+                        <option value="7">7 min</option>
+                        <option value="10">10 min</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Language</label>
+                    <select id="languageSelect">
+                        <option value="English" selected>English</option>
+                        <option value="Hindi">Hindi</option>
+                        <option value="Urdu">Urdu</option>
+                        <option value="Roman Urdu">Roman Urdu</option>
+                        <option value="Spanish">Spanish</option>
+                        <option value="French">French</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Avatar</label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; height: 100%; color: var(--text-primary); text-transform: none; font-weight: 500;">
+                        <input type="checkbox" id="avatarCheckbox" style="width: 18px; height: 18px; cursor: pointer;" checked>
+                        Enable PNGTuber
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>Resolution</label>
+                    <div style="display: flex; gap: 12px; align-items: center; height: 100%;">
+                        <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--text-primary); font-weight: 500; font-size: 13px;">
+                            <input type="radio" name="resolution" value="480p" style="cursor: pointer;"> 480p
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--text-primary); font-weight: 500; font-size: 13px;">
+                            <input type="radio" name="resolution" value="720p" style="cursor: pointer;"> 720p
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--text-primary); font-weight: 500; font-size: 13px;">
+                            <input type="radio" name="resolution" value="1080p" checked style="cursor: pointer;"> 1080p
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button class="btn-generate" id="generateBtn" onclick="startGeneration()">
+                        🚀 Generate
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Custom Script Dropdown -->
+            <div style="margin-top: 16px;">
+                <button type="button" onclick="toggleCustomScript()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 13px; font-weight: 600; text-decoration: underline;">
+                    + Advanced: Provide Custom Script JSON
+                </button>
+                <div id="customScriptContainer" style="display: none; margin-top: 12px;">
+                    <textarea id="customScriptInput" placeholder='{\n  "title": "My Video",\n  "description": "...",\n  "tags": ["..."],\n  "segments": [\n    {\n      "voiceover": "Sentence 1.",\n      "search_query": "nature",\n      "key_term": "Word",\n      "mood": "calm"\n    }\n  ]\n}' style="width: 100%; height: 200px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 13px; resize: vertical;"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section" id="progressSection">
+            <!-- Status Banner -->
+            <div class="status-banner running" id="statusBanner">
+                <div class="status-left">
+                    <div class="status-icon" id="statusIcon">⚡</div>
+                    <div class="status-text">
+                        <h3 id="statusTitle">Generating your video...</h3>
+                        <p id="statusSub">Starting pipeline...</p>
+                    </div>
+                </div>
+                <div class="status-right">
+                    <div class="status-pct" id="statusPct">0%</div>
+                    <div class="status-elapsed" id="statusElapsed">0s elapsed</div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
+            </div>
+
+            <!-- Step Cards -->
+            <div class="steps-grid" id="stepsGrid">
+                <div class="step-card" data-step="1">
+                    <span class="step-num">Step 1</span>
+                    <div class="step-name">Generate Script</div>
+                    <span class="step-icon">📝</span>
+                </div>
+                <div class="step-card" data-step="2">
+                    <span class="step-num">Step 2</span>
+                    <div class="step-name">Sound Effects</div>
+                    <span class="step-icon">🔊</span>
+                </div>
+                <div class="step-card" data-step="3">
+                    <span class="step-num">Step 3</span>
+                    <div class="step-name">Background Music</div>
+                    <span class="step-icon">🎵</span>
+                </div>
+                <div class="step-card" data-step="4">
+                    <span class="step-num">Step 4</span>
+                    <div class="step-name">Voiceover</div>
+                    <span class="step-icon">🎙️</span>
+                </div>
+                <div class="step-card" data-step="5">
+                    <span class="step-num">Step 5</span>
+                    <div class="step-name">Video Clips</div>
+                    <span class="step-icon">🎥</span>
+                </div>
+                <div class="step-card" data-step="6">
+                    <span class="step-num">Step 6</span>
+                    <div class="step-name">Graphics</div>
+                    <span class="step-icon">🎨</span>
+                </div>
+                <div class="step-card" data-step="7">
+                    <span class="step-num">Step 7</span>
+                    <div class="step-name">Visual Effects</div>
+                    <span class="step-icon">✨</span>
+                </div>
+                <div class="step-card" data-step="8">
+                    <span class="step-num">Step 8</span>
+                    <div class="step-name">Assembly</div>
+                    <span class="step-icon">🔧</span>
+                </div>
+                <div class="step-card" data-step="9">
+                    <span class="step-num">Step 9</span>
+                    <div class="step-name">Audio Mix</div>
+                    <span class="step-icon">🎚️</span>
+                </div>
+                <div class="step-card" data-step="10">
+                    <span class="step-num">Step 10</span>
+                    <div class="step-name">Final Render</div>
+                    <span class="step-icon">🏁</span>
+                </div>
+            </div>
+
+            <!-- Log Console -->
+            <div class="log-card">
+                <div class="log-header">
+                    <h4>📋 Live Pipeline Log</h4>
+                    <div class="log-dot" id="logDot"></div>
+                </div>
+                <div class="log-body" id="logBody">
+                    <div class="log-entry">Waiting for pipeline to start...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Complete Section -->
+        <div class="complete-section" id="completeSection">
+            <div class="complete-icon">🎉</div>
+            <h2>Your Video is Ready!</h2>
+            <p id="completeDuration">Generated in 0 seconds</p>
+            <a href="/api/download" class="btn-download">⬇ Download Video</a>
+            <button class="btn-new" onclick="resetUI()">+ New Video</button>
+        </div>
+    </div>
+
+    <script>
+        let pollInterval = null;
+        let lastLogCount = 0;
+
+        async function startGeneration() {
+            const topic = document.getElementById('topicInput').value.trim();
+            const duration = document.getElementById('durationSelect').value;
+            const language = document.getElementById('languageSelect').value;
+            const customScript = document.getElementById('customScriptInput').value.trim();
+            const useAvatar = document.getElementById('avatarCheckbox').checked;
+            const resolution = document.querySelector('input[name="resolution"]:checked').value;
+
+            if (!topic && !customScript) {
+                document.getElementById('topicInput').style.borderColor = '#ef5350';
+                document.getElementById('topicInput').focus();
+                setTimeout(() => {
+                    document.getElementById('topicInput').style.borderColor = '';
+                }, 2000);
+                return;
+            }
+
+            document.getElementById('generateBtn').disabled = true;
+            document.getElementById('progressSection').classList.add('active');
+            document.getElementById('completeSection').classList.remove('active');
+            lastLogCount = 0;
+
+            // Reset step cards
+            document.querySelectorAll('.step-card').forEach(c => {
+                c.classList.remove('done', 'active', 'error');
+            });
+
+            try {
+                const res = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        topic, duration, language, 
+                        custom_script: customScript,
+                        use_avatar: useAvatar,
+                        resolution: resolution
+                    })
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    alert(err.error || 'Failed to start');
+                    document.getElementById('generateBtn').disabled = false;
+                    return;
+                }
+
+                // Start polling
+                pollInterval = setInterval(pollProgress, 1000);
+
+            } catch (e) {
+                alert('Failed to connect to server: ' + e.message);
+                document.getElementById('generateBtn').disabled = false;
+            }
+        }
+
+        async function pollProgress() {
+            try {
+                const res = await fetch('/api/progress');
+                const data = await res.json();
+
+                // Update percentage
+                document.getElementById('statusPct').textContent = data.percentage + '%';
+                document.getElementById('progressBarFill').style.width = data.percentage + '%';
+                document.getElementById('statusElapsed').textContent = data.elapsed + ' elapsed';
+
+                // Update status banner
+                const banner = document.getElementById('statusBanner');
+                banner.className = 'status-banner ' + data.status;
+
+                if (data.status === 'running') {
+                    document.getElementById('statusIcon').textContent = '⚡';
+                    document.getElementById('statusTitle').textContent = data.current_step || 'Processing...';
+                    document.getElementById('statusSub').textContent = data.sub_progress || '';
+                } else if (data.status === 'complete') {
+                    document.getElementById('statusIcon').textContent = '✅';
+                    document.getElementById('statusTitle').textContent = 'Complete!';
+                    document.getElementById('statusSub').textContent = 'Your video is ready to download';
+                    
+                    // Show complete section
+                    document.getElementById('completeSection').classList.add('active');
+                    document.getElementById('completeDuration').textContent = 'Generated in ' + data.elapsed;
+                    document.getElementById('generateBtn').disabled = false;
+                    document.getElementById('logDot').style.background = '#66bb6a';
+                    
+                    clearInterval(pollInterval);
+                } else if (data.status === 'error') {
+                    document.getElementById('statusIcon').textContent = '❌';
+                    document.getElementById('statusTitle').textContent = 'Error';
+                    document.getElementById('statusSub').textContent = data.error || 'Something went wrong';
+                    document.getElementById('generateBtn').disabled = false;
+                    document.getElementById('logDot').style.background = '#ef5350';
+                    
+                    clearInterval(pollInterval);
+                }
+
+                // Update step cards
+                const currentStep = data.step_number || 0;
+                document.querySelectorAll('.step-card').forEach(card => {
+                    const stepNum = parseInt(card.dataset.step);
+                    card.classList.remove('done', 'active', 'error');
+                    if (stepNum < currentStep) {
+                        card.classList.add('done');
+                    } else if (stepNum === currentStep) {
+                        card.classList.add(data.status === 'error' ? 'error' : 'active');
+                    }
+                });
+
+                // Update log
+                if (data.log && data.log.length > lastLogCount) {
+                    const logBody = document.getElementById('logBody');
+                    for (let i = lastLogCount; i < data.log.length; i++) {
+                        const entry = document.createElement('div');
+                        entry.className = 'log-entry';
+                        if (data.log[i].includes('ERROR')) entry.className += ' error';
+                        if (data.log[i].includes('✅')) entry.className += ' success';
+                        entry.textContent = data.log[i];
+                        logBody.appendChild(entry);
+                    }
+                    lastLogCount = data.log.length;
+                    logBody.scrollTop = logBody.scrollHeight;
+                }
+
+            } catch (e) {
+                console.error('Poll error:', e);
+            }
+        }
+
+        function resetUI() {
+            document.getElementById('progressSection').classList.remove('active');
+            document.getElementById('completeSection').classList.remove('active');
+            document.getElementById('topicInput').value = '';
+            document.getElementById('generateBtn').disabled = false;
+            document.getElementById('progressBarFill').style.width = '0%';
+            document.getElementById('logBody').innerHTML = '<div class="log-entry">Waiting for pipeline to start...</div>';
+            lastLogCount = 0;
+
+            document.querySelectorAll('.step-card').forEach(c => {
+                c.classList.remove('done', 'active', 'error');
+            });
+        }
+
+        function toggleCustomScript() {
+            const container = document.getElementById('customScriptContainer');
+            container.style.display = container.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Allow Enter key to trigger generation
+        document.getElementById('topicInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') startGeneration();
+        });
+    </script>
+</body>
+</html>

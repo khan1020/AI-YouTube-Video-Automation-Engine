@@ -1,0 +1,9 @@
+openai
+edge-tts
+moviepy
+requests
+python-dotenv
+pillow
+scipy
+pydub
+flask
